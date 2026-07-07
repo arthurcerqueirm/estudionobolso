@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transforme Sua Foto — Kit de Prompts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E0E13;
+    --surface:#17171D;
+    --surface-2:#0B0B0F;
+    --border:#262630;
+    --text:#F4F4F7;
+    --muted:#9C9CAA;
+    --gold:#FFB86B;
+    --pink:#FF7EB6;
+    --success:#64E3A1;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Instrument Sans",system-ui,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(120% 60% at 50% -10%, rgba(255,184,107,.14), transparent 60%);
+  }
+  .wrap{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:0 20px}
+
+  /* Top bar */
+  header{
+    position:sticky;top:0;z-index:20;
+    background:rgba(14,14,19,.72);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  .bar{display:flex;align-items:center;justify-content:space-between;height:60px;max-width:920px;margin:0 auto;padding:0 20px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:-.02em}
+  .brand .dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--pink));box-shadow:0 0 16px rgba(255,126,182,.5)}
+  .brand{color:var(--text);text-decoration:none}
+  .brand .mark{width:26px;height:26px;flex-shrink:0}
+  .brand .wordmark{font-weight:500;font-size:1.15rem;letter-spacing:.01em}
+  .brand .dotpink{color:var(--pink)}
+  .bar .kit{font-size:.72rem;color:var(--muted);border:1px solid var(--border);padding:5px 10px;border-radius:100px}
+
+  /* Hero */
+  .hero{padding:54px 0 30px;text-align:center}
+  .hero .eyebrow{font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:16px}
+  .hero h1{
+    font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
+    font-size:clamp(2.1rem,7vw,3.4rem);line-height:1.02;letter-spacing:-.03em;
+  }
+  .hero h1 em{font-style:normal;background:linear-gradient(115deg,var(--gold),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--muted);max-width:440px;margin:18px auto 0;font-size:1.02rem}
+
+  /* Steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:36px 0 8px}
+  .step{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 14px}
+  .step .n{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;color:var(--gold);font-size:.9rem;margin-bottom:8px}
+  .step h4{font-size:.92rem;font-weight:600;margin-bottom:4px}
+  .step p{font-size:.82rem;color:var(--muted);line-height:1.4}
+
+  /* Section label */
+  .section-label{display:flex;align-items:center;gap:12px;margin:48px 0 22px}
+  .section-label span{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:1.35rem;letter-spacing:-.02em;white-space:nowrap}
+  .section-label .rule{flex:1;height:1px;background:var(--border)}
+
+  /* Cards */
+  .grid{display:grid;gap:22px}
+  @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}}
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    overflow:hidden;opacity:0;transform:translateY(14px);
+    transition:opacity .6s ease,transform .6s ease;
+  }
+  .card.in{opacity:1;transform:none}
+
+  /* Before/After reveal */
+  .reveal{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;cursor:ew-resize;touch-action:none;user-select:none;background:#000}
+  .reveal .layer{position:absolute;inset:0;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center}
+  .reveal .before{z-index:2}
+  .ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:20px}
+  .ph .big{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:-.02em}
+  .ph .sub{font-size:.74rem;color:var(--muted);max-width:80%}
+  .ph.before-ph{background:linear-gradient(150deg,#232329,#161619)}
+  .ph.before-ph .big{color:#6f6f7d}
+  .ph.after-ph{background:linear-gradient(150deg,#2b2233,#3a2a2f)}
+  .ph.after-ph .big{background:linear-gradient(115deg,var(--gold),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .handle{position:absolute;top:0;bottom:0;z-index:3;width:2px;background:linear-gradient(var(--gold),var(--pink));transform:translateX(-1px);pointer-events:none}
+  .grip{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:rgba(14,14,19,.85);border:1.5px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:.9rem;box-shadow:0 0 18px rgba(255,126,182,.45);backdrop-filter:blur(4px)}
+  .tag{position:absolute;z-index:4;top:12px;font-size:.66rem;font-weight:600;letter-spacing:.1em;padding:4px 9px;border-radius:100px;background:rgba(14,14,19,.7);border:1px solid var(--border);backdrop-filter:blur(4px)}
+  .tag-before{left:12px;color:var(--muted)}
+  .tag-after{right:12px;color:var(--gold)}
+
+  .card-body{padding:18px 18px 20px}
+  .card-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+  .card-head .num{font-family:"JetBrains Mono",monospace;font-size:.8rem;color:var(--gold)}
+  .card-head h3{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:1.12rem;letter-spacing:-.02em;line-height:1.15}
+  .ideal{font-size:.82rem;color:var(--muted);margin-bottom:14px}
+
+  .prompt{position:relative;background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:14px 14px 14px}
+  .prompt code{display:block;font-family:"JetBrains Mono",monospace;font-size:.72rem;line-height:1.55;color:#d7d7e0;white-space:pre-wrap;word-break:break-word;max-height:150px;overflow:hidden;transition:max-height .3s ease}
+  .prompt.open code{max-height:2400px}
+  .prompt .fade{position:absolute;left:0;right:0;bottom:52px;height:44px;background:linear-gradient(transparent,var(--surface-2));pointer-events:none;transition:opacity .3s}
+  .prompt.open .fade{opacity:0}
+  .prompt-actions{display:flex;gap:8px;margin-top:12px}
+  .btn{flex:1;font-family:inherit;font-size:.82rem;font-weight:600;padding:10px;border-radius:9px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:7px}
+  .btn.copy{background:var(--gold);color:#1a1206;border-color:var(--gold)}
+  .btn.copy.done{background:var(--success);border-color:var(--success);color:#062015}
+  .btn.copy:active{transform:scale(.98)}
+  .btn.expand:hover{border-color:var(--muted)}
+
+  /* Guide table */
+  .guide{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
+  .guide-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);align-items:center}
+  .guide-row:last-child{border-bottom:none}
+  .guide-row.head{background:var(--surface-2)}
+  .guide-row.head div{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .guide-row .a{font-size:.9rem;color:var(--muted)}
+  .guide-row .b{font-size:.9rem;font-weight:500;color:var(--gold)}
+
+  footer{text-align:center;padding:50px 0 40px;color:var(--muted);font-size:.8rem}
+  footer .brand{justify-content:center;margin-bottom:10px;color:var(--text)}
+
+  /* Password gate */
+  #gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+  #gate::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 60% at 50% 0%,rgba(255,184,107,.16),transparent 60%)}
+  .gate-box{position:relative;text-align:center;max-width:340px;width:100%}
+  .gate-box .dot{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--pink));margin:0 auto 18px;box-shadow:0 0 24px rgba(255,126,182,.5)}
+  .gate-box h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:1.5rem;letter-spacing:-.02em;margin-bottom:6px}
+  .gate-box p{color:var(--muted);font-size:.9rem;margin-bottom:20px}
+  .gate-box input{width:100%;padding:14px;border-radius:11px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:1rem;text-align:center;margin-bottom:10px}
+  .gate-box input:focus{outline:none;border-color:var(--gold)}
+  .gate-box button{width:100%;padding:14px;border-radius:11px;border:none;background:var(--gold);color:#1a1206;font-family:inherit;font-weight:600;font-size:1rem;cursor:pointer}
+  .gate-err{color:var(--pink);font-size:.82rem;height:18px;margin-top:8px}
+
+  @media (prefers-reduced-motion:reduce){
+    .card{opacity:1;transform:none;transition:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     EDITE AQUI 👇  — mude textos, senha e prompts. O resto se monta sozinho.
+     Para as imagens: cole a URL da foto em beforeImg / afterImg.
+     Deixe "" (vazio) para mostrar o espaço reservado.
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+const CONFIG = {
+  brandName: "Estúdio no Bolso",
+  password: "",           // deixe "" para NÃO pedir senha. Ex: "kit2026"
+
+  prompts: [
+    {
+      title: "Golden Hour Vibrante",
+      ideal: "Ideal para: fotos de praia, viagem e retratos ao ar livre com cara de pôr do sol premium",
+      beforeImg: "",       // cole aqui a URL da foto ANTES
+      afterImg: "",        // cole aqui a URL da foto DEPOIS
+      prompt: `@Criar imagem Ultra Prompt — Natural Vibrant Golden Hour Transformation
+
+Transform the source image into the same scene with a naturally vibrant, premium, high-end smartphone look while preserving the original composition, framing, facial identity, pose, clothing, hairstyle, background, and perspective exactly. Do not alter or reconstruct any objects. The goal is not to create a different photo, but to enhance the existing one as if it were captured under perfect golden-hour conditions with superior camera processing.
+
+Identity Preservation
+
+Preserve 100%:
+
+exact facial identity
+facial proportions
+expression
+skin texture
+hairstyle
+body shape
+clothing
+accessories
+camera angle
+composition
+crop
+background geometry
+
+Do not beautify or modify facial structure.
+
+White Balance
+
+Shift the white balance toward a warmer golden-hour temperature.
+
+Increase warmth naturally without introducing orange color casts.
+
+Temperature:
++12 to +18
+
+Tint:
++3 magenta
+
+The image should feel illuminated by late afternoon sunlight.
+
+Global Color Palette
+
+Transform the image from cool and flat into warm, luminous, cinematic natural colors.
+
+Overall mood:
+
+• warm
+• inviting
+• fresh
+• airy
+• vibrant
+• realistic
+
+No HDR look.
+
+No excessive saturation.
+
+No artificial Instagram filter appearance.
+
+Exposure
+
+Increase exposure slightly.
+
++0.2 EV
+
+Protect highlights.
+
+Maintain realistic dynamic range.
+
+Contrast
+
+Increase contrast gently.
+
+Only enough to add depth.
+
+Avoid crushed blacks.
+
+Avoid harsh transitions.
+
+Maintain soft tonal rolloff.
+
+Filmic Tone Curve
+
+Apply a gentle film-inspired S-curve.
+
+Lift black point slightly.
+
+Roll highlights softly.
+
+Preserve shadow detail.
+
+Avoid digital clipping.
+
+Blacks should become deep charcoal instead of absolute black.
+
+Skin Tones
+
+Skin should become:
+
+healthy
+
+slightly warmer
+
+soft peach
+
+naturally luminous
+
+Increase skin luminosity.
+
+Reduce dull gray tones.
+
+Maintain realistic pores.
+
+Never oversoften skin.
+
+Avoid beauty filter effects.
+
+No waxy texture.
+
+No orange skin.
+
+No red oversaturation.
+
+Sky
+
+Transform the sky into a subtle pastel sunset.
+
+Increase:
+
+soft peach
+
+warm coral
+
+gentle pink
+
+golden horizon
+
+Maintain soft blue gradients.
+
+Reduce cyan dominance.
+
+Avoid vivid blue skies.
+
+Clouds should receive warm sunlight.
+
+Ocean
+
+Water should reflect the sunset.
+
+Introduce:
+
+soft teal
+
+warm reflections
+
+slight golden highlights
+
+Increase clarity only slightly.
+
+No exaggerated turquoise.
+
+Sand
+
+Transform dull gray sand into warm beige.
+
+Increase:
+
+golden luminance
+
+soft warmth
+
+fine texture
+
+Avoid yellow oversaturation.
+
+Hair
+
+Increase richness of dark brown tones.
+
+Enhance:
+
+natural shine
+
+soft highlights
+
+individual strands
+
+without making hair glossy.
+
+Clothing
+
+Increase fabric richness.
+
+Preserve original color.
+
+Improve depth through micro contrast.
+
+Avoid color shifting.
+
+Color Separation
+
+Highlights:
+
+warm golden
+
+soft peach
+
+cream
+
+Midtones:
+
+neutral warm
+
+slightly amber
+
+Shadows:
+
+cool neutral
+
+slight teal
+
+very subtle
+
+Create natural warm/cool separation.
+
+HSL Adjustments
+
+Orange
+
++10 luminance
+
++8 saturation
+
+Hue slightly toward peach
+
+Yellow
+
+Hue toward warm beige
+
++8 luminance
+
+Blue
+
+−12 saturation
+
++10 luminance
+
+Hue slightly toward teal
+
+Aqua
+
+Reduce saturation
+
+Red
+
+Very slight reduction
+
+Avoid red skin.
+
+Lighting
+
+Simulate soft golden-hour sunlight.
+
+Light should appear:
+
+natural
+
+diffused
+
+directional
+
+coming from the sunset
+
+No fake light rays.
+
+No dramatic relighting.
+
+Simply enhance existing light.
+
+Local Contrast
+
+Increase microcontrast only on:
+
+eyes
+
+hair
+
+clothing texture
+
+Reduce microcontrast on:
+
+skin
+
+sky
+
+sand
+
+This creates premium depth.
+
+Sharpness
+
+Increase perceived sharpness.
+
+Keep edges crisp.
+
+No halos.
+
+No oversharpening.
+
+Dynamic Range
+
+Expand perceived dynamic range.
+
+Recover:
+
+highlight detail
+
+shadow detail
+
+without creating HDR artifacts.
+
+Atmosphere
+
+Introduce a barely perceptible cinematic glow.
+
+Very soft highlight bloom.
+
+Almost invisible.
+
+Creates a premium lens rendering.
+
+Lens Rendering
+
+Simulate:
+
+large smartphone sensor
+
+premium optics
+
+high-quality computational photography
+
+Natural optical rendering.
+
+No fake bokeh.
+
+No artificial blur.
+
+Saturation Strategy
+
+Increase vibrancy instead of saturation.
+
+Muted colors remain muted.
+
+Rich colors become richer.
+
+Skin remains natural.
+
+Sky remains soft.
+
+Overall saturation increase should feel almost invisible.
+
+Texture
+
+Preserve:
+
+skin pores
+
+fabric texture
+
+sand texture
+
+hair strands
+
+cloud details
+
+Avoid AI smoothing.
+
+Avoid plastic rendering.
+
+Noise
+
+Very subtle fine film grain.
+
+Organic.
+
+Almost imperceptible.
+
+Adds realism.
+
+Mood
+
+The final image should feel:
+
+alive
+
+warm
+
+expensive
+
+premium
+
+natural
+
+effortless
+
+vacation
+
+golden hour
+
+editorial
+
+Kodak Portra inspired
+
+captured directly from a flagship smartphone under perfect sunset conditions
+
+Negative Prompt
+
+Do NOT:
+
+change the person's identity
+alter facial features
+smooth skin excessively
+increase saturation too much
+create HDR artifacts
+oversharpen
+add fake sun flares
+add fake bokeh
+modify composition
+modify pose
+modify clothing
+change background objects
+introduce unrealistic colors
+create orange skin
+clip highlights
+crush shadows
+make the image look AI-generated
+apply obvious Instagram filters
+create an overprocessed appearance`
+    }
+  ],
+
+  guide: [
+    ["Sua foto de praia, viagem ou retrato ao ar livre", "Prompt 1 — Golden Hour Vibrante"]
+  ]
+};
+</script>
+<!-- ═══════════════ fim da parte editável ═══════════════ -->
+
+
+<div id="gate" style="display:none">
+  <div class="gate-box">
+    <svg viewBox="0 0 80 80" style="width:44px;height:44px;margin:0 auto 18px;display:block" aria-hidden="true"><defs><linearGradient id="gmGate" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB86B"/><stop offset="1" stop-color="#FF7EB6"/></linearGradient></defs><g stroke="url(#gmGate)" stroke-width="5" stroke-linecap="round"><line x1="70" y1="40" x2="25" y2="65.98"/><line x1="55" y1="65.98" x2="10" y2="40"/><line x1="25" y1="65.98" x2="25" y2="14.02"/><line x1="10" y1="40" x2="55" y2="14.02"/><line x1="25" y1="14.02" x2="70" y2="40"/><line x1="55" y1="14.02" x2="55" y2="65.98"/></g></svg>
+    <h2>Bem-vindo(a) 👋</h2>
+    <p>Digite a senha que você recebeu na compra para acessar seus prompts.</p>
+    <input id="gate-input" type="text" inputmode="text" placeholder="senha" autocomplete="off">
+    <button id="gate-btn">Acessar meus prompts</button>
+    <div class="gate-err" id="gate-err"></div>
+  </div>
+</div>
+
+<header>
+  <div class="bar">
+    <a class="brand" href="#"><svg class="mark" viewBox="0 0 80 80" aria-hidden="true"><defs><linearGradient id="gmH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB86B"/><stop offset="1" stop-color="#FF7EB6"/></linearGradient></defs><g stroke="url(#gmH)" stroke-width="5" stroke-linecap="round"><line x1="70" y1="40" x2="25" y2="65.98"/><line x1="55" y1="65.98" x2="10" y2="40"/><line x1="25" y1="65.98" x2="25" y2="14.02"/><line x1="10" y1="40" x2="55" y2="14.02"/><line x1="25" y1="14.02" x2="70" y2="40"/><line x1="55" y1="14.02" x2="55" y2="65.98"/></g></svg><span class="wordmark">estúdio<span class="dotpink">.</span>bolso</span></a>
+    <span class="kit">Kit de Prompts</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Seu acesso liberado</div>
+    <h1>Sua foto comum,<br><em>revelada</em>.</h1>
+    <p>Não precisa saber editar. Envie sua foto, cole o prompt e deixe a IA transformar pra você.</p>
+  </section>
+
+  <section class="steps">
+    <div class="step"><div class="n">1</div><h4>Envie sua foto</h4><p>Abra o app de IA e envie a foto que quer transformar.</p></div>
+    <div class="step"><div class="n">2</div><h4>Cole o prompt</h4><p>Toque em “Copiar” no prompt certo e cole no app.</p></div>
+    <div class="step"><div class="n">3</div><h4>Gere</h4><p>Pronto — sua foto sai com cara de profissional.</p></div>
+  </section>
+
+  <div class="section-label"><span>Seus prompts</span><div class="rule"></div></div>
+  <p style="color:var(--muted);font-size:.86rem;margin:-8px 0 18px">Arraste a barrinha nas imagens para ver o antes e depois. Funciona melhor no <b style="color:var(--text)">Nano Banana (Gemini)</b>, <b style="color:var(--text)">Flux Kontext</b> ou <b style="color:var(--text)">Seedream</b>.</p>
+
+  <div class="grid" id="cards"></div>
+
+  <div class="section-label"><span>Qual foto usa qual prompt</span><div class="rule"></div></div>
+  <div class="guide" id="guide">
+    <div class="guide-row head"><div>Sua foto é…</div><div>Use o…</div></div>
+  </div>
+
+  <footer>
+    <div class="brand"><svg class="mark" viewBox="0 0 80 80" aria-hidden="true"><defs><linearGradient id="gmF" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB86B"/><stop offset="1" stop-color="#FF7EB6"/></linearGradient></defs><g stroke="url(#gmF)" stroke-width="5" stroke-linecap="round"><line x1="70" y1="40" x2="25" y2="65.98"/><line x1="55" y1="65.98" x2="10" y2="40"/><line x1="25" y1="65.98" x2="25" y2="14.02"/><line x1="10" y1="40" x2="55" y2="14.02"/><line x1="25" y1="14.02" x2="70" y2="40"/><line x1="55" y1="14.02" x2="55" y2="65.98"/></g></svg><span class="wordmark">estúdio<span class="dotpink">.</span>bolso</span></div>
+    <div>Obrigado por comprar 💛 Guarde este link — novos prompts entram aqui.</div>
+  </footer>
+</main>
+
+<script>
+(function(){
+  // Brand
+  document.title = CONFIG.brandName + " — Kit de Prompts";
+
+  // ---- Password gate ----
+  function unlock(){ document.getElementById('gate').style.display='none'; }
+  if(CONFIG.password && CONFIG.password.length){
+    const gate=document.getElementById('gate');
+    gate.style.display='flex';
+    if(sessionStorage.getItem('unlocked')==='1') unlock();
+    const input=document.getElementById('gate-input');
+    const err=document.getElementById('gate-err');
+    function tryUnlock(){
+      if(input.value.trim()===CONFIG.password){ sessionStorage.setItem('unlocked','1'); unlock(); }
+      else { err.textContent='Senha incorreta. Confira no e-mail da compra.'; }
+    }
+    document.getElementById('gate-btn').addEventListener('click',tryUnlock);
+    input.addEventListener('keydown',e=>{ if(e.key==='Enter') tryUnlock(); });
+  }
+
+  // ---- Render cards ----
+  const cards=document.getElementById('cards');
+  CONFIG.prompts.forEach((p,i)=>{
+    const num=String(i+1).padStart(2,'0');
+    const beforeLayer = p.beforeImg
+      ? `<div class="layer before" style="background-image:url('${p.beforeImg}')"></div>`
+      : `<div class="layer before"><div class="ph before-ph"><div class="big">ANTES</div><div class="sub">cole a URL em beforeImg</div></div></div>`;
+    const afterLayer = p.afterImg
+      ? `<div class="layer after" style="background-image:url('${p.afterImg}')"></div>`
+      : `<div class="layer after"><div class="ph after-ph"><div class="big">DEPOIS</div><div class="sub">cole a URL em afterImg</div></div></div>`;
+
+    const art=document.createElement('article');
+    art.className='card';
+    art.innerHTML=`
+      <div class="reveal">
+        ${afterLayer}
+        ${beforeLayer}
+        <span class="tag tag-before">ANTES</span>
+        <span class="tag tag-after">DEPOIS</span>
+        <div class="handle"><span class="grip">⟷</span></div>
+      </div>
+      <div class="card-body">
+        <div class="card-head"><span class="num">${num}</span><h3>${p.title}</h3></div>
+        <p class="ideal">${p.ideal}</p>
+        <div class="prompt">
+          <code></code>
+          <div class="fade"></div>
+          <div class="prompt-actions">
+            <button class="btn copy">Copiar prompt</button>
+            <button class="btn expand">Ver tudo</button>
+          </div>
+        </div>
+      </div>`;
+    art.querySelector('code').textContent=p.prompt;
+    cards.appendChild(art);
+
+    // reveal slider
+    const reveal=art.querySelector('.reveal');
+    const before=art.querySelector('.before');
+    const handle=art.querySelector('.handle');
+    let dragging=false;
+    function setPos(clientX){
+      const r=reveal.getBoundingClientRect();
+      let pct=((clientX-r.left)/r.width)*100;
+      pct=Math.max(0,Math.min(100,pct));
+      before.style.clipPath=`inset(0 ${100-pct}% 0 0)`;
+      handle.style.left=pct+'%';
+    }
+    before.style.clipPath='inset(0 50% 0 0)';
+    handle.style.left='50%';
+    reveal.addEventListener('pointerdown',e=>{dragging=true;reveal.setPointerCapture(e.pointerId);setPos(e.clientX);});
+    reveal.addEventListener('pointermove',e=>{if(dragging)setPos(e.clientX);});
+    reveal.addEventListener('pointerup',()=>dragging=false);
+    reveal.addEventListener('pointercancel',()=>dragging=false);
+
+    // copy
+    const copyBtn=art.querySelector('.copy');
+    copyBtn.addEventListener('click',async()=>{
+      try{ await navigator.clipboard.writeText(p.prompt); }
+      catch(e){
+        const t=document.createElement('textarea');t.value=p.prompt;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();
+      }
+      copyBtn.textContent='Copiado ✓';copyBtn.classList.add('done');
+      setTimeout(()=>{copyBtn.textContent='Copiar prompt';copyBtn.classList.remove('done');},1600);
+    });
+
+    // expand
+    const promptBox=art.querySelector('.prompt');
+    const expandBtn=art.querySelector('.expand');
+    expandBtn.addEventListener('click',()=>{
+      promptBox.classList.toggle('open');
+      expandBtn.textContent=promptBox.classList.contains('open')?'Recolher':'Ver tudo';
+    });
+  });
+
+  // ---- Render guide ----
+  const guide=document.getElementById('guide');
+  CONFIG.guide.forEach(row=>{
+    const div=document.createElement('div');
+    div.className='guide-row';
+    div.innerHTML=`<div class="a">${row[0]}</div><div class="b">${row[1]}</div>`;
+    guide.appendChild(div);
+  });
+
+  // ---- Scroll reveal ----
+  const io=new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('.card').forEach(c=>io.observe(c));
+})();
+</script>
+</body>
+</html>
